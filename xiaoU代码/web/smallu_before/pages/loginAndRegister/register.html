@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册</title>
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="../../css/reset.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/register.css" />
+
+    <!-- 1. 引入vue依赖 -->
+    <script src="../../vue/vue-v2.6.10.js"></script>
+    <script src="../../vue/axios-0.18.0.js"></script>
+</head>
+
+<body>
+    <!-- 3. 指定视图管理组件 -->
+    <div id="app">
+        <div class="pos">
+            <div class="login">
+                <span class="close iconfont icon-close"></span>
+                <img src="../../img/login/loginlogo.png" alt="">
+                <ul>
+                    <li></li>
+                    <li class="phone" v-html="msg">使用手机号注册</li>
+                    <li></li>
+                </ul>
+                <form action="" id="form">
+                    <input ref="ph" type="text" @blur="checkPhone(ruleForm.phone)" name="phone" id="" v-model="ruleForm.phone" placeholder="请输入您的手机号">
+                    <em v-text="msg1"></em>
+                    <input ref="pw" type="password" @blur="checkPassword(ruleForm.password)" name="password" v-model="ruleForm.password" id="" placeholder="请输入密码">
+                    <em v-text="msg2"></em>
+                    <input ref="pw2" type="password" @blur="checkPassword2(ruleForm.password2)" name="password2" v-model="ruleForm.password2" id="" placeholder="请再次输入密码">
+                    <em v-text="msg3"></em>
+                    <input ref="yz" type="text" @blur="checkYzm(ruleForm.yzm)"  name="yanzhen" id="" v-model="ruleForm.yzm" class="yanzhen" placeholder="请输入验证码">
+                    <span class="yanzhenma" v-text="code" @click="initCode">5739</span>
+                    <em v-text="msg4"></em>
+                    <div class="clear"></div>
+                    
+                </form>
+                <button class="loginbtn" @click="submitForm()">注册</button>
+               
+                <input type="checkbox" class="xuanze" />
+                <p>
+                    <span><a href="javascript:;">我同意 《用户使用协议》</a></span>
+                    <span>
+                        已有账号
+                        <a href="javascript:;">去登陆</a>
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- 与vue.js  冲突 造成下面的js无效 -->
+    <script src="../../utils/utils.js"></script>
+    <script src="../../js/register.js"></script>
+    <script>
+        // 2. 实例化vue对象
+        new Vue({
+            el: '#app',
+            data: {
+                ruleForm:{
+                    phone: '',
+                    password: '',
+                    password2: '',
+                    yzm: ''
+                },
+                msg: '',
+                code: '', // 验证码
+                msg1: '', // 手机号校验提示信息
+                msg2: '', // 密码校验提示信息
+                msg3: '', // 确认密码校验提示信息
+                msg4: '', // 验证码校验提示信息
+            },
+            methods: {
+                // 1. vue中自己校验表单  (作业)
+                checkPhone(phone){  // 校验手机号
+                    console.log(phone);
+                    //手机号是否为空
+                    if(phone ==null || phone.trim().length==0){
+                        this.msg1 = "手机号不能为空";
+                        return ;
+                    }else{
+                        //手机号不为空 是否是一个正规手机号(正则)
+                        var reg = /^[1][3,4,5,6,7,8,9][0-9]{9}$/;
+                        var flag = reg.test(phone);
+                        if(flag){
+                            let params = new URLSearchParams();
+                            params.append("method","checkPhone");
+                            params.append("phone",phone);
+                            //去数据中校验是否有人使用该手机号注册过
+                             axios.post('http://localhost:8080/beforeuser',params).then(resp=>{
+                                 if(resp.data.flag){
+                                    this.msg1 = '';
+                                 }else{
+                                    this.msg1='该手机号被使用';
+                                 }
+                             });                           
+                        }else{
+                            this.msg1 = "手机号不符合要求";
+                            return ;
+                        }
+                    }
+                   
+                },
+                checkPassword(password){ // 校验密码
+                    // 1. 密码是否为空
+                    if(password==null || password.trim().length==0){
+                        this.msg2 = "密码不能为空";
+                        return ;
+                    }else{
+                        this.msg2 = '';
+                    }
+                },
+                checkPassword2(password2){ // 校验确认密码
+                    if(password2==null || password2.trim().length==0){
+                        this.msg3 = "确认密码不能为空";
+                        return ;
+                    }else{
+                        if(password2===this.ruleForm.password){
+                            this.msg3 = '';
+                        }else{
+                            this.msg3 = '两次密码不一致';
+                        }
+                    }
+                },
+                checkYzm(yzm){ // 验证码校验
+                    if(yzm==null || yzm.trim().length==0){
+                        this.msg4 = "验证码不能为空";
+                        return ;
+                    }else{
+                        if(yzm.toLocaleLowerCase()===this.code.toLocaleLowerCase()){
+                            this.msg4 = '';
+                        }else{
+                            this.msg4 = '验证码输入错误';
+                        }
+                    }
+                },
+                // 2. 发送注册请求
+                submitForm(){ // 点击注册按钮 执行的函数
+                    // console.log(1111)
+                    // 0. 执行表单校验  触发每一个输入框的失去焦点事件
+                    this.$refs.ph.focus();
+                    this.$refs.pw.focus();
+                    this.$refs.pw2.focus();
+                    this.$refs.yz.focus();
+
+                    if(this.msg1===''&&this.msg2===''&&this.msg3===''&&this.msg4===''){
+                        let params = new URLSearchParams();
+                        params.append("method","register");
+                        params.append("phone",this.ruleForm.phone);
+                        params.append("password",this.ruleForm.password);
+                        //提交后台完成注册--跳转到登录页面
+                        axios.post('http://localhost:8080/beforeuser',params).then(resp=>{
+                            if(resp.data.flag){
+                                setTimeout("window.location.href='http://localhost:5500/smallu_before/pages/loginAndRegister/login.html'",2000);
+                            }else{
+                                this.msg="<font color='red'>注册失败请联系管理员</font>";
+                            }
+                        });
+                    }else{
+                       //表单内容不符合校验规则
+                        this.msg="<font color='red'>表单内容不合符校验规则</font>";
+                    }
+                },
+
+                initCode(){ // 生成注册页面的验证码
+                    let str = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    // 随机4个字符
+                    let num = 0
+                    let code = ''
+                    for(let i=0; i<4; i++){
+                        num = Math.floor(Math.random()*str.length) // 0~61
+                        code += str[num] 
+                    }
+                    // 将生成的4个字符  绑定到 vue的code中
+                    this.code = code               
+                }
+            },
+            created(){ // 页面内容加载之前执行 该钩子函数
+                this.initCode()
+            }
+        })
+    </script>
+</body>
+
+</html>

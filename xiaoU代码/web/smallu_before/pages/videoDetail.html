@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频详情</title>
+    <link rel="stylesheet" href="http://at.alicdn.com/t/font_2384888_ojge9md3tr.css
+    ">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../css/videoDetail.css">
+
+
+    <!-- 1. 引入vue依赖 -->
+    <script src="../vue/vue-v2.6.10.js"></script>
+    <script src="../vue/axios-0.18.0.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- 导航菜单 -->
+        <nav>
+            <div class="main">
+                <img src="../img/public/logo.png" alt="" class="logo">
+                <ul>
+                    <li><a href="../index.html">首页</a></li>
+                    <li class="check"><a href="./online.html">同步课程</a></li>
+                    <li><a href="javascript:;">在线练习</a></li>
+                    <li><a href="javascript:;">精品课程</a></li>
+                </ul>
+                <div class="search">
+                    <div class="left">课程<i class="iconfont icon-down"></i>
+                    </div>
+                    <input type="text" placeholder="搜索感兴趣的内容">
+                    <img src="../img/public/search.png" alt="">
+                </div>
+                <div class="login" v-show="flag1">
+                    <a href="./loginAndRegister/login.html">登陆</a>
+                    /
+                    <a href="./loginAndRegister/register.html">注册</a>
+                </div>
+                <div class="user" v-show="flag2">
+                    <img src="../img/login/user.png" alt="">
+                    <div class="userlist">
+                        <ul>
+                            <li v-text="user.username">我是用户名</li>
+                            <li><a href="./course.html">课程中心</a></li>
+                            <li>订单中心</li>
+                            <li>资金管理</li>
+                            <li>个人中心</li>
+                            <li class="out" @click="loginOut">退出登陆</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="all">
+            <div class="crumbs">
+                <span>首页</span>
+                <span>></span>
+                <span>同步课堂</span>
+                <span>></span>
+                <span>视频详情</span>
+            </div>
+        </div>
+        <!-- 主体内容 -->
+        <main>
+            <div class="classDetail">
+                <div class="left">
+                    <img :src="'http://localhost:8080/javawebDemo/'+course.courseImage" alt="">
+                </div>
+                <div class="right">
+                <p class="title" v-text="course.courseName">[2019年秋季] 初三数学班</p>
+                <ul>
+                    <!-- <li>年级科目：初三数学</li>
+                    <li>课时数量：15课时</li> -->
+                    <li v-text="'开课时间：'+course.createTime">开课时间：09月30日—12月20日</li>
+                    <!-- <li>有效期至：2020年12月20日</li> -->
+                    <li>距报名截止仅剩</li>
+                    <li>
+                        <span>142</span>天
+                        <span>23</span>时
+                        <span>32</span>分
+                        <span>45</span>秒
+                    </li>
+                    <li class="price" v-show="flag5" @click="toStudy">
+                        <span>去学习</span>
+                    </li>
+                    <li class="sale" v-show="flag6">
+                        <span v-text="'¥'+course.coursePrice+'购买'" @click="toPay(course.coursePrice)">¥199单独购买</span>
+                        <span v-text=`¥${parseFloat(course.coursePrice*0.8).toFixed(2)}拼团` @click="toPay(parseFloat(course.coursePrice*0.8).toFixed(2))">￥99拼团</span>
+                    </li>
+                </ul> 
+                </div>
+            </div>
+            <div class="row introduce" v-text="course.descs">
+                <!-- <p>授课师资</p>
+            <div class="left">
+                <p class="img">
+                    <img src="" alt="">
+                </p>
+                <p class="right">
+                    <span>李晓明</span>
+                    <span>小U课堂高级讲师</span>
+                </p>
+
+            </div>
+            <div class="right">
+                多年IT行业从业经验，精通常用的Web开发技术;熟悉主流的CMS、商城、论坛 等PHP开源产品，具有丰富的建站及二次开发经验，多个大型ERP系统的开发实践经验;精通常用的PHP开发框架，对服务器架构及服务器日常运维等方面有一 定的研究。
+            </div> -->
+            </div>
+            <div class="row title">
+                <span :class="{active:flag3==true}" @click="showZhangJie">课程目录</span><span @click="showDetail" :class="{active:flag4==true}">课程详情</span>
+            </div>
+            <div class="classlist active" v-show="flag3">
+                <div class="content">
+                    <div class="detail" v-for="(items, key) in courseDetails">
+                        <p class="title" v-text="key">第一章：公开课（含4期）<i class="iconfont icon-top1"></i></p>
+                        <ul class="active">
+                            <li v-for="courseDetail in items">
+                                <p>
+                                    <i class="iconfont icon-bofang"></i>
+                                    <span v-text="courseDetail.name">第0节：化学的研究对象和研究方法</span>
+                                </p>
+                                <p>
+                                    <span v-text="courseDetail.start_data+'开播'">2020.12.10 20：00开播</span>
+                                    <span class="start">播放视频</span>
+                                </p>
+                            </li>
+                            <!-- <li>
+                                <p>
+                                    <i class="iconfont icon-bofang"></i>
+                                    <span>第1节：离子反应</span>
+                                </p>
+                                <p>2020.12.10 20：00开播</p>
+                            </li>
+                            <li>
+                                <p>
+                                    <i class="iconfont icon-bofang"></i>
+                                    <span>第2节：氧化还原反应</span>
+                                </p>
+                                <p>2020.12.10 20：00开播</p>
+                            </li>
+                            <li>
+                                <p>
+                                    <i class="iconfont icon-bofang"></i>
+                                    <span>第3节：钠及其化合物</span>
+                                </p>
+                                <p>2020.12.10 20：00开播</p>
+                            </li> -->
+                        </ul>
+                    </div>
+                </div>
+                <div class="bottom">
+                    <span class="seeAll">点击展开查看全部</span>
+                </div>
+            </div>
+            <div class="classlist" v-show="flag4">
+                <video :src="'http://localhost:8080/javawebDemo/'+course.courseVideo" controls width="1100" height="500"></video>
+            </div>
+        </main>
+
+        <footer>
+            <div class="cont">
+                <div class="main">
+                    <p>
+                        首页 | 关于我们 | 加入我们 | 合作专区 | 联系我们 | AI开放平台 | 意见反馈 | 漏洞提交 | 隐私政策 | 版权声明 | 反盗链声明 | 网上有害信息举报 | 备案公示 |
+                        营业执照
+                        | 教师资格证公示
+
+                    </p>
+                    <p>
+                        京ICP备 13030888号 Copyright © 2014-2019 行者信息科技（北京）有限公司 | 地址：北京市新华区马当路388号C座 | 电话：010-66666666 |
+                        京公网安备
+                        01010102002533号
+                    </p>
+                    <p>
+                        京网文〔2018〕4086-308号 | 网络文化经营许可证：沪网文[2018]4086-308号 | 增值电信业务经营许可证：京B2-20150021 |
+                        食品经营 许可证：JY13101140088888
+                    </p>
+                    <p>医疗器械经营许可证：京嘉食药监械经营许20188008号 | 互联网药品信息服务资格证书：(京)-经营性-2018-0011 |</p>
+                </div>
+            </div>
+        </footer>
+
+        <div class="pos">
+            <div class="login">
+                <span class="close iconfont icon-close"></span>
+                <img src="../img/login/loginlogo.png" alt="">
+                <ul>
+                    <li></li>
+                    <li class="phone">使用手机号登陆</li>
+                    <li></li>
+                </ul>
+                <input type="text" name="" id="" placeholder="请输入您的手机号">
+                <input type="password" name="" id="" placeholder="请输入密码">
+                <button class="loginbtn">
+                    登陆
+                </button>
+                <p>
+                    <span><a href="javascript:;">忘记密码</a></span>
+                    <span>
+                        还没有账号?
+                        <a href="javascript:;">点击注册</a>
+                    </span>
+                </p>
+                <ul>
+                    <li></li>
+                    <li class="phone">使用第三方软件登录</li>
+                    <li></li>
+                </ul>
+                <p class="getCenter">
+                    <img src="../img/login/wx.png" alt=""><img src="../img/login/qq.png" alt=""><img
+                        src="../img/login/sina.png" alt="">
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- 
+        Create by Shuangyu Fu.
+        Date: 2021-02-26
+    -->
+
+    <script src="../js/ujiuye.js"></script>
+    <script src="../js/videoDetaildata.js"></script>
+    <!-- <script src="../js/videoDetail.js"></script> -->
+
+
+    <script>
+        axios.defaults.withCredentials = true  // vue发送axios 允许携带cookie
+        // 2. 实例化vue对象
+        new Vue({
+            el: '#app',
+            data: {
+               user: '',  // 获取用户信息
+               flag1: true, // 登录注册标签 是否显示
+               flag2: false, // 用户信息 是否显示
+               course: '', // 获取课程信息
+               flag3: true, // 课程章节是否显示
+               flag4: false, // 课程详情 是否显示
+               courseDetails: '', // 获取该课程下的章节
+               flag5: false, //去学习
+               flag6: true //去组团购买
+            },
+            methods: {
+                getUserInfo(){//判断用户是否登录
+                    axios.post('http://localhost:8080/beforeuser?method=getUserInfo').then(resp=>{
+                        if(resp.data.flag){
+                            this.user = resp.data.data;
+                            this.flag1 = false;
+                            this.flag2 = true;
+                        }else{
+                            this.flag1 = true;
+                            this.flag2 = false;
+                        }
+                        // console.log(resp.data.data+"=-------------------------------------");
+                    });
+                },
+                loginOut(){  // 点击退出登录
+                    axios.post('http://localhost:8080/beforeuser?method=logOut').then(resp=> {
+                        if(resp.data.flag){
+                            this.user = '';
+                            this.flag1 = true;
+                            this.flag2 = false;
+                        }
+                    })
+                },
+                getCourseByCid(){ // 获取当前课程信息
+                   //1.获取课程 cid 根据url携带参数 进行查询 找中间表courser_user 
+                    let param = location.search // ?cid=3 
+                    let arr = param.split("=");
+                    //2.根据cid 查询课程详情
+                    axios.get("http://localhost:8080/beforecourse?method=getCourseInfo&cid="+arr[1]).then(resp=>{
+                        if(resp.data.flag) {
+                            //3获取课程信息
+                            this.course = resp.data.data;
+                        } 
+                        // console.log(resp.data+"=-------------------------------------");
+
+                    });
+                },
+                showDetail(){ // 点击课程详情 隐藏章节
+                //详情 开启
+                this.flag3 = false;
+                this.flag4 = true
+                },
+                showZhangJie(){ // 点击课程目录详情
+                    this.flag3 = true;
+                    this.flag4 = false
+                },
+                getCourseDetailByCid(){ // 根据该课程 获取课程下的章节
+                  //1.携带课程id
+                  let param = location.search;
+                  let arr = param.split("=");
+                  //2.发送axios
+                  axios.get("http://localhost:8080/beforeCourseDetail?method=getCourseDetailByCid&cid="+arr[1]).then(resp=>{
+                        //获取响应后
+                        if(resp.data.flag){
+                            this.courseDetails = resp.data.data;
+                        }
+                  });
+                },
+                toPay(price){  // 点击支付  
+                    if(this.flag2) { //用户已登录 去支付
+                        //1.携带参数
+                        //1.1商户订单号
+                        // alert("支付"+price)
+                        let WIDout_trade_no = Math.random()+Math.random()
+                        // 1.2 订单名称
+                        let WIDsubject = this.course.courseName 
+                        // 1.3 支付金额
+                        let WIDtotal_amount = price
+                        // 1.4 WIDbody
+                        let WIDbody = "商品名称"
+                        // 1.5 课程id
+                        let param = location.search
+                        let arr = param.split("=");
+                        // 2. 发送同步请求请求
+                        let url = "http://localhost:8080/beforePay?method=toPay"
+                        url += "&WIDout_trade_no="+WIDout_trade_no
+                        url += "&WIDsubject="+WIDsubject
+                        url += "&WIDtotal_amount="+WIDtotal_amount
+                        url += "&WIDbody="+WIDbody
+                        url += "&cid="+arr[1]
+                        
+                        window.location.href = url
+                    }else{
+                        window.location.href = "http://localhost:5500/smallu_before/pages/loginAndRegister/login.html"
+                    }                 
+                },
+                isPayCourseUser(){  // 判断该用户是否购买该课程
+                   //1.课程id
+                   let param = location.search;
+                   let arr = param.split("=");
+                   //2.发送异步请求 革命剧uid和cid查询中间表 是否有对应 的关系  isPayCourseUser是否支付
+                   //    beforeCourseUser      beforeCourseDetail   都有该方法存在
+                   axios.get("http://localhost:8080/beforeCourseUser?method=isPayCourseUser&cid="+arr[1]).then(resp=>{
+                        //3.判断
+                        // alert(arr[1])
+                        if(resp.data.flag){
+                            //已购买 : flag5, //去学习  flag6:/去组团购买
+                            // 去学习显示  支付隐藏
+                            this.flag5 = true;
+                            this.flag6 = false;
+                        }else{
+                            // 没有购买 去学习隐藏  支付显示
+                            this.flag5 = false;
+                            this.flag6 = true;
+                        }   
+                   });
+                },
+                toStudy(){  // 点击去学习 跳转到章节视频播放页面
+                   //1课程的id
+                   let param = location.search;
+                   let arr = param.split("=")
+                   //2. 跳转播放页面
+                   window.location.href = "./videoPlay.html?cid="+arr[1]
+                }
+            },
+            created(){
+                this.getUserInfo()  // 获取当前登录的用户信息
+                this.getCourseByCid() // 获取当前课程信息
+                this.getCourseDetailByCid()  // 获取该课程下的章节
+                this.isPayCourseUser()  // 判断该用户是否购买该课程
+            }    
+        })
+    </script>
+</body>
+
+</html>

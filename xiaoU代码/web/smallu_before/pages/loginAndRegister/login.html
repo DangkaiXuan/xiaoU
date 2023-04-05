@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="../../css/reset.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/login.css" />
+
+    <!-- 1. 引入vue依赖 -->
+    <script src="../../vue/vue-v2.6.10.js"></script>
+    <script src="../../vue/axios-0.18.0.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div class="pos">
+            <div class="login">
+                <span class="close iconfont icon-close"></span>
+                <img src="../../img/login/loginlogo.png" alt="">
+                <ul>
+                    <li></li>
+                    <li class="phone">使用手机号登陆</li>
+                    <li></li>
+                </ul>
+                <form action="" id="form">
+                    <input ref="ph" @blur="checkPhone(phone)" v-model="phone" type="text" name="tel" class="tel" id="" placeholder="请输入您的手机号">
+         
+                    <input ref="pwd" @blur="checkPassword(password)" v-model="password" type="password" name="pass" class="pass" id="" placeholder="请输入密码">
+                    <em v-text="msg"></em>
+                    
+                </form>
+                <button class="loginbtn" @click="submitForm()">
+                    登陆
+                </button>
+                <p>
+                    <span><a href="javascript:;">忘记密码</a></span>
+                    <span>
+                        还没有账号?
+                        <a href="javascript:;">点击注册</a>
+                    </span>
+                </p>
+                <ul>
+                    <li></li>
+                    <li class="phone">使用第三方软件登录</li>
+                    <li></li>
+                </ul>
+                <p class="getCenter">
+                    <img src="../../img/login/wx.png" alt="">
+                    <img src="../../img/login/qq.png" alt="">
+                    <img src="../../img/login/sina.png" alt="">
+                </p>
+            </div>
+        </div>
+    </div>
+    <script src="../../utils/utils.js"></script>
+    <script src="../../js/login.js"></script>
+
+    <script>
+         axios.defaults.withCredentials = true  // vue发送axios 允许携带cookie
+        // 2. 创建vue实例
+        new Vue({
+            el: '#app',
+            data: {
+                phone: '', // 手机号
+                msg: '', // 校验手机号和密码的提示信息
+                password: '' , // 密码
+                
+            },
+            methods: {
+                checkPhone(phone){  // 校验手机号
+                    if(phone ==null || phone.trim().length==0){
+                        this.msg = "手机号不能为空";
+                        return ;
+                    }else{
+                        this.msg = '';
+                    }
+                },
+                checkPassword(password){ // 校验密码
+                    if(password ==null || password.trim().length==0){
+                        this.msg = "密码不能为空";
+                        return ;
+                    }else{
+                        this.msg = '';
+                    }
+                },
+                submitForm(){ // 点击登录按钮 执行该函数
+                    // 1. 校验表单
+                    this.$refs.ph.focus();                
+                    this.$refs.pwd.focus();
+                    if(this.msg===''){
+                        //校验通过
+                        var params = new URLSearchParams();
+                        params.append("phone",this.phone);
+                        params.append("password",this.password);
+                        params.append("method","login");
+                        axios.post('http://localhost:8080/beforeuser',params).then(resp=>{
+                            // console.log(resp.data.data);
+                             if(resp.data.flag){
+                                 setTimeout("window.location.href='http://localhost:5500/smallu_before/index.html'",2000);
+                             }else{
+                                  this.$message.error(resp.data.msg)
+                             }
+                        });
+                    }else{
+                        alert("输入的信息有误请联系管理员"); 
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
